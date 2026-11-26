@@ -9,3 +9,8 @@ packages:
 minimumReleaseAge: 10080
 trustPolicy: no-downgrade
 blockExoticSubdeps: true
+
+# Reviewed false positives (exact versions only; see docs/agent/DECISIONS.md):
+# undici-types@6.21.0 — published 2024-11-13 by Node.js core maintainer, pre-provenance 6.x line.
+trustPolicyExclude:
+  - undici-types@6.21.0

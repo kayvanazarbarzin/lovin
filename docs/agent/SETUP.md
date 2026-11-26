@@ -15,15 +15,15 @@ npx skills list -g          # verify "ruflo" is listed
 ```
 Pinning: the fork `kayvanazarbarzin/ruflo` must first be synced with upstream (GitHub → "Sync fork"), then tagged `lavin-pin-<date>`. Record the tag/SHA in `docs/agent/DECISIONS.md`. Update deliberately with `npx skills update -g ruflo` and review the diff; never auto-update.
 
-## 3. Ruflo CLI in the repo (dev dependency, pinned)
+## 3. Ruflo CLI (pinned via npx — not a repo dependency)
+Ruflo's ~700-package dependency tree repeatedly fails the pnpm supply-chain guards (trust downgrades, daily releases), so it stays out of `package.json` (DECISIONS 2026-11-27).
 ```bash
-pnpm add -D -w ruflo@3.80.8        # exact version, lockfile committed
-pnpm exec ruflo init                # review the generated diff before committing
-pnpm exec ruflo doctor              # do NOT use --fix until you have reviewed what it changes
-pnpm exec ruflo discover-plugins
-pnpm exec ruflo mcp list
+npx -y ruflo@3.80.8 --version       # always this exact version
+npx -y ruflo@3.80.8 doctor          # do NOT use --fix until you have reviewed what it changes
+npx -y ruflo@3.80.8 plugins list    # (formerly discover-plugins) — registry is unsigned; install none without review
+npx -y ruflo@3.80.8 mcp status
 ```
-Rules: Ruflo is for multi-agent tasks marked `Mode: swarm` only. Never give Ruflo agents real secrets or customer data. `ruflo init` output (`.claude/`, MCP config, hooks) is committed only after review.
+Rules: swarms only for tasks marked `Mode: swarm`; project skills in any task (AGENTS.md §9). Never give Ruflo agents real secrets or customer data. `ruflo init` output is committed only after review (see `docs/dev/ruflo-setup.md`).
 
 ## 4. Recommended skills (project level, small set to save tokens)
 Every installed skill adds its description to the agent's context, so install only what the tasks use.
@@ -31,14 +31,13 @@ Every installed skill adds its description to the agent's context, so install on
 | Skill | Why | Install |
 |---|---|---|
 | `ruflo` | orchestration entry point | global (above) |
-| `adr-create`, `adr-review` | ADR discipline (every architecture change) | `npx skills add ruvnet/ruflo --skill adr-create` (repeat per skill) |
+| `adr-create`, `adr-review` | ADR discipline (every architecture change) | `npx skills add https://github.com/kayvanazarbarzin/ruflo/tree/lavin-pin-2026-11-26 --full-depth -s <skill> -a claude-code github-copilot -y` |
 | `migrate-create`, `migrate-validate` | SQL migration hygiene | same pattern |
 | `tdd-workflow`, `test-gaps` | test-first and missing-test detection | same pattern |
 | `security-scan`, `dependency-check` | per-PR security & dependency audit | same pattern |
-| `cost-compact-context` | keep long sessions small | same pattern |
 
 Do **not** install `--all` (267 skills): it bloats context on every turn.
-After installing, commit `skills-lock.json` so every agent restores the same set: `npx skills install --frozen-lockfile`.
+After installing, commit `skills-lock.json` so every agent restores the same set: `npx skills experimental_install --frozen-lockfile`.
 
 ## 5. Local stack
 ```bash

@@ -17,14 +17,6 @@
       "skillPath": "plugins/ruflo-adr/skills/adr-review/SKILL.md",
       "computedHash": "4936d560d98d4715d074b1ccaba9315bf56eac3e7c4f5d13518ab454f3f15312"
     },
-    "cost-compact-context": {
-      "source": "kayvanazarbarzin/ruflo",
-      "ref": "lavin-pin-2026-11-26",
-      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
-      "sourceType": "github",
-      "skillPath": "plugins/ruflo-cost-tracker/skills/cost-compact-context/SKILL.md",
-      "computedHash": "9c37ede2d3a80962da9c0b6cd5ca67b2d36a2a14855903df44ab37f8c0d21564"
-    },
     "dependency-check": {
       "source": "kayvanazarbarzin/ruflo",
       "ref": "lavin-pin-2026-11-26",

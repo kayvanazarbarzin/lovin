@@ -28,6 +28,7 @@ Read: `docs/agent/SETUP.md` §2–4, PRD §20.1–20.2
 Do: verify global `ruflo` skill; add `ruflo@3.80.8` as exact dev dependency; run `ruflo init`, review and commit only needed files; run `doctor`, `discover-plugins`, `mcp list` and save output summary to `docs/dev/ruflo-setup.md`; install the recommended project skills; commit `skills-lock.json`; record fork tag/SHA in DECISIONS.md.
 Done when: `npx skills list` shows exactly the recommended set; `pnpm exec ruflo --version` = 3.80.8; `pnpm audit --prod` unaffected (Ruflo is dev-only).
 Evidence: 2026-11-26 — `npx skills list` = exactly the 9 recommended skills (source kayvanazarbarzin/ruflo@lavin-pin-2026-11-26); `pnpm exec ruflo --version` → v3.80.8; `pnpm audit --prod` → no known vulnerabilities; doctor 24 pass / 12 optional warnings. Details: `docs/dev/ruflo-setup.md`.
+Amended 2026-11-27 (owner, during T-004): Ruflo removed from devDependencies (its tree fails pnpm trust/age guards); run as `npx -y ruflo@3.80.8` → `ruflo v3.80.8`; `cost-compact-context` removed (works only inside the Ruflo repo) → 8 skills in `skills-lock.json`.
 
 ### T-004 · CI pipeline
 Status: todo · Size: M · Mode: single · Depends: T-002

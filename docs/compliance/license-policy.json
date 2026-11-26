@@ -14,11 +14,5 @@
     "Unlicense",
     "CC-BY-4.0"
   ],
-  "devExceptions": [
-    { "package": "@anthropic-ai/claude-agent-sdk", "license": "Unknown", "reason": "dev-only, via ruflo@3.80.8; Anthropic commercial terms; never shipped" },
-    { "package": "@claude-flow/*", "license": "Unknown", "reason": "dev-only, via ruflo@3.80.8 (MIT project); package.json lacks a license field" },
-    { "package": "@img/sharp-*", "license": "Apache-2.0 AND LGPL-3.0-or-later", "reason": "dev-only, via ruflo; prebuilt libvips binary, dynamically loaded, not shipped" },
-    { "package": "@img/sharp-libvips-*", "license": "LGPL-3.0-or-later", "reason": "dev-only, via ruflo; prebuilt libvips binary, dynamically loaded, not shipped" },
-    { "package": "uri-templates", "license": "http://geraintluff.github.io/tv4/LICENSE.txt", "reason": "dev-only, via ruflo; tv4 license is public-domain/MIT dual" }
-  ]
+  "devExceptions": []
 }

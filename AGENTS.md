@@ -80,7 +80,9 @@ Input validated with Zod at the edge · authz + scope test for each new endpoint
 - Read the smallest thing that answers the question: search (`rg`) before opening; open line ranges, not whole files.
 - Do not re-read files you just edited. Do not paste large files or logs into chat; summarize.
 - Do not regenerate unchanged files. Prefer small diffs.
-- Use Ruflo multi-agent orchestration only for tasks marked `Mode: swarm`. Everything else is single-agent.
+- Use Ruflo multi-agent orchestration (swarms, `claude-flow` MCP server) only for tasks marked `Mode: swarm`. Everything else is single-agent.
+- Ruflo project skills (`adr-review`, `test-gaps`, `security-scan`, `migrate-*`, `tdd-workflow`, `dependency-check`) may be used in any task where they fit.
+- Ruflo is **not** a repo dependency. Run it only as `npx -y ruflo@3.80.8 <command>`; where a skill says `npx @claude-flow/cli@latest`, use that pinned command instead. Skip skill steps that call `mcp__plugin_ruflo-core_*` tools unless the MCP server is enabled for a swarm task.
 
 ## 10. Map
 
