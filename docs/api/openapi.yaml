@@ -1,0 +1,801 @@
+openapi: 3.1.0
+info:
+  title: لاوین (Lavin) — Core API
+  version: 0.1.0-draft
+  description: |
+    API نسخه‌دار هسته (PRD §15). همه endpointها default-deny هستند و `x-permission` مجوز لازم را مشخص می‌کند.
+    Scope رکورد (tenant/bu/team/assigned/own) سمت سرور اعمال می‌شود؛ رکورد خارج از scope همیشه `404` برمی‌گرداند
+    (برای عدم افشای وجود) و در audit با outcome=denied ثبت می‌شود. این فایل پیش‌نویس قرارداد است و در پیاده‌سازی از Zod تولید/همگام می‌شود.
+servers:
+  - url: https://{host}/api/v1
+    variables:
+      host: { default: lavin.example.internal }
+security:
+  - oidc: []
+tags:
+  - { name: crm }
+  - { name: tasks }
+  - { name: workflows }
+  - { name: support }
+  - { name: channels }
+  - { name: cti }
+  - { name: content }
+  - { name: marketing }
+  - { name: ai }
+  - { name: eval }
+  - { name: admin }
+  - { name: audit }
+  - { name: iam }
+
+paths:
+  /me:
+    get:
+      tags: [iam]
+      summary: پروفایل کاربر جاری و permissionهای مؤثر (برای UI؛ تصمیم نهایی سمت سرور)
+      x-permission: authenticated
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Me' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /leads:
+    get:
+      tags: [crm]
+      summary: فهرست Leadها در scope کاربر
+      x-permission: crm.lead.view
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Sort'
+        - { name: q, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/LeadStatus' } }
+        - { name: source, in: query, schema: { $ref: '#/components/schemas/Source' } }
+        - { name: campaign_id, in: query, schema: { type: string, format: uuid } }
+        - { name: owner_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - properties:
+                      items: { type: array, items: { $ref: '#/components/schemas/Lead' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [crm]
+      summary: ثبت Lead (SALE-001) — dedupe و scoring و شروع BPM-LEAD-01 به‌صورت async
+      x-permission: crm.lead.create
+      x-events: [lead.created.v1]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/LeadCreate' } } }
+      responses:
+        '201':
+          description: Created
+          content: { application/json: { schema: { $ref: '#/components/schemas/Lead' } } }
+        '200': { description: پاسخ تکراری برای همان Idempotency-Key }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Validation' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /leads/{id}:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    get:
+      tags: [crm]
+      x-permission: crm.lead.view
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Lead' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [crm]
+      x-permission: crm.lead.edit
+      parameters: [ { $ref: '#/components/parameters/IfMatch' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody: { required: true, content: { application/merge-patch+json: { schema: { $ref: '#/components/schemas/LeadPatch' } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Lead' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '412': { $ref: '#/components/responses/PreconditionFailed' }
+
+  /leads/{id}/merge:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [crm]
+      summary: ادغام تکراری با audit و قابلیت rollback (SALE-002)
+      x-permission: crm.lead.merge
+      x-events: [lead.merged.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [duplicate_ids, field_resolution]
+              properties:
+                duplicate_ids: { type: array, minItems: 1, maxItems: 10, items: { type: string, format: uuid } }
+                field_resolution: { type: object, additionalProperties: { type: string, format: uuid } }
+      responses:
+        '200': { description: Merged; شامل merge_id برای rollback }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /contacts/{id}/timeline:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    get:
+      tags: [crm]
+      summary: نمای ۳۶۰ — پیام، تماس، معامله، تسک، قرارداد، رضایت، SLA (SALE-003)؛ هر آیتم جداگانه scope-filter می‌شود
+      x-permission: crm.contact.view
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - { name: types, in: query, style: form, explode: false, schema: { type: array, items: { type: string, enum: [message, call, deal, task, case, contract, consent, activity, content] } } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - properties:
+                      items: { type: array, items: { $ref: '#/components/schemas/TimelineItem' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /deals/{id}/transitions:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [crm]
+      summary: تغییر مرحله Deal با guard (فعالیت اجباری، علت Lost، تأیید BPM) — SALE-005/006
+      x-permission: crm.deal.transition
+      x-events: [deal.stage_changed.v1, deal.won.v1, deal.lost.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_stage_id, expected_version]
+              properties:
+                target_stage_id: { type: string }
+                expected_version: { type: integer }
+                lost_reason: { type: string }
+                note: { type: string, maxLength: 2000 }
+      responses:
+        '200': { description: Accepted transition }
+        '409': { $ref: '#/components/responses/TransitionRejected' }
+        '412': { $ref: '#/components/responses/PreconditionFailed' }
+
+  /tasks/boards/{boardId}:
+    parameters: [ { name: boardId, in: path, required: true, schema: { type: string, format: uuid } } ]
+    get:
+      tags: [tasks]
+      summary: برد کانبان با ستون‌ها و کارت‌های داخل scope
+      x-permission: tasks.board.view
+      parameters:
+        - { name: swimlane, in: query, schema: { type: string, enum: [team, campaign, account, assignee, none] } }
+        - { name: view_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Board' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tasks/boards/{boardId}/stream:
+    parameters: [ { name: boardId, in: path, required: true, schema: { type: string, format: uuid } } ]
+    get:
+      tags: [tasks]
+      summary: رویدادهای زنده برد (SSE)؛ هر رویداد قبل از ارسال scope-filter می‌شود
+      x-permission: tasks.board.view
+      responses:
+        '200': { description: text/event-stream, content: { text/event-stream: { schema: { type: string } } } }
+
+  /tasks:
+    post:
+      tags: [tasks]
+      x-permission: tasks.task.create
+      x-events: [task.created.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TaskCreate' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Task' } } } }
+
+  /tasks/{id}/transition:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [tasks]
+      summary: RequestTransition — تنها راه جابه‌جایی کارت (PRD §10.2، AT-06)
+      x-permission: tasks.task.transition
+      x-events: [task.transitioned.v1]
+      parameters: [ { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_column_id, expected_version]
+              properties:
+                target_column_id: { type: string, format: uuid }
+                expected_version: { type: integer }
+                position: { type: number }
+                form_data: { type: object, description: داده فرم user task در صورت نیاز outcome }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Task' } } } }
+        '409': { $ref: '#/components/responses/TransitionRejected' }
+        '412': { $ref: '#/components/responses/PreconditionFailed' }
+
+  /workflows/definitions:
+    get:
+      tags: [workflows]
+      x-permission: bpm.definition.view
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/WorkflowDefinition' } } } } }
+    post:
+      tags: [workflows]
+      summary: ثبت Draft از BPMN/DMN XML
+      x-permission: bpm.definition.design
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, kind, xml]
+              properties:
+                key: { type: string, pattern: '^[A-Z]+-[A-Z0-9-]+$' }
+                kind: { type: string, enum: [bpmn, dmn] }
+                xml: { type: string, maxLength: 2000000 }
+      responses:
+        '201': { description: Draft created }
+        '422': { $ref: '#/components/responses/Validation' }
+
+  /workflows/definitions/{id}/deploy:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [workflows]
+      summary: انتشار پس از validate + simulate؛ نیازمند approval
+      x-permission: bpm.definition.deploy
+      x-events: [workflow.definition.deployed.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      responses:
+        '202': { description: درخواست تأیید ثبت شد }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /workflows/{key}/start:
+    parameters: [ { name: key, in: path, required: true, schema: { type: string } } ]
+    post:
+      tags: [workflows]
+      x-permission: bpm.instance.start
+      x-events: [workflow.instance.started.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [business_key]
+              properties:
+                business_key: { type: string }
+                variables: { type: object }
+      responses:
+        '201': { description: Started, content: { application/json: { schema: { $ref: '#/components/schemas/WorkflowInstance' } } } }
+
+  /workflows/tasks/{id}/complete:
+    parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+    post:
+      tags: [workflows]
+      x-permission: bpm.task.complete
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [outcome]
+              properties:
+                outcome: { type: string }
+                form_data: { type: object }
+      responses:
+        '200': { description: Completed }
+        '409': { $ref: '#/components/responses/TransitionRejected' }
+
+  /cases:
+    post:
+      tags: [support]
+      summary: ثبت Case/شکایت (CTI-006، E2E-02) — شروع BPM-COMPLAINT-01
+      x-permission: support.case.create
+      x-events: [case.created.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, source]
+              properties:
+                title: { type: string, maxLength: 300 }
+                description: { type: string }
+                source: { $ref: '#/components/schemas/Source' }
+                source_ref: { type: string, description: 'call_id یا message_id' }
+                crm_contact_id: { type: string }
+                consent_id: { type: string, format: uuid }
+      responses:
+        '201': { description: Created }
+
+  /channels/accounts:
+    get:
+      tags: [channels]
+      x-permission: channels.account.view
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ChannelAccount' } } } } }
+
+  /channels/accounts/{id}/test:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [channels]
+      summary: تست اتصال نسخه pending تنظیمات؛ در شکست نسخه فعال قبلی دست نمی‌خورد (AT-14)
+      x-permission: channels.account.configure
+      responses:
+        '200': { description: نتیجه تست + capability matrix به‌روز, content: { application/json: { schema: { $ref: '#/components/schemas/ConnectionTestResult' } } } }
+
+  /channels/{provider}/webhook/{accountAlias}:
+    parameters:
+      - { name: provider, in: path, required: true, schema: { type: string, enum: [bale, rubika, telegram] } }
+      - { name: accountAlias, in: path, required: true, schema: { type: string, minLength: 32 } }
+    post:
+      tags: [channels]
+      summary: Webhook ورودی — secret path/header، schema، ذخیره dedupe و ack سریع (AT-03)
+      security: []
+      x-auth: secret alias + provider secret header (در صورت پشتیبانی)
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        '200': { description: Accepted (حتی برای duplicate) }
+        '401': { description: secret نامعتبر — بدون جزئیات }
+        '413': { description: Payload too large }
+        '429': { description: Rate limited }
+
+  /conversations/{id}/messages:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [channels]
+      summary: ارسال پاسخ عامل از inbox؛ ارسال واقعی async از outbox
+      x-permission: channels.message.send
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [client_msg_id, body]
+              properties:
+                client_msg_id: { type: string, format: uuid }
+                body: { type: string, maxLength: 4096 }
+                internal_note: { type: boolean, default: false }
+      responses:
+        '202': { description: Queued }
+        '422': { description: 'UNSUPPORTED_CAPABILITY یا عدم consent', content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+
+  /cti/connections/{id}/test:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [cti]
+      x-permission: cti.connection.configure
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ConnectionTestResult' } } } }
+
+  /cti/calls/{id}:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    get:
+      tags: [cti]
+      x-permission: cti.call.view
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Call' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /cti/calls/dial:
+    post:
+      tags: [cti]
+      summary: Click-to-call از extension خود کاربر
+      x-permission: cti.call.dial
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to]
+              properties:
+                to: { type: string, description: E.164 یا شماره داخلی }
+                related_type: { type: string }
+                related_id: { type: string }
+      responses:
+        '202': { description: Originate requested }
+
+  /cti/recordings/{id}/url:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [cti]
+      summary: صدور URL امضاشده کوتاه‌عمر فقط پس از authz (AT-18)
+      x-permission: cti.recording.view
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { url: { type: string, format: uri }, expires_at: { type: string, format: date-time } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /content/{id}/submit-for-review:
+    parameters: [ { $ref: '#/components/parameters/Id' } ]
+    post:
+      tags: [content]
+      summary: ارسال نسخه به بازبینی — اجرای برندگارد/EVAL و BPM-CONTENT-01
+      x-permission: content.draft.edit
+      x-events: [content.submitted.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { version_id: { type: string, format: uuid }, note: { type: string } } }
+      responses:
+        '202': { description: Submitted }
+
+  /campaigns:
+    post:
+      tags: [marketing]
+      x-permission: marketing.campaign.create
+      x-events: [campaign.created.v1]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CampaignCreate' } } } }
+      responses:
+        '201': { description: Created }
+
+  /ai/chat:
+    post:
+      tags: [ai]
+      summary: پاسخ RAG برای کاربر داخلی (stream با SSE) — retrieval محدود به ACL کاربر (AT-09)
+      x-permission: ai.chat.use
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                conversation_id: { type: string, format: uuid }
+                message: { type: string, maxLength: 8000 }
+                stream: { type: boolean, default: true }
+      responses:
+        '200': { description: پاسخ با citations و trace_id }
+
+  /eval/runs:
+    post:
+      tags: [eval]
+      summary: شروع اجرای async ارزیابی؛ بدون credential هیچ run ساخته نمی‌شود (AT-10)
+      x-permission: eval.run.start
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [suite_id, suite_version, target]
+              properties:
+                suite_id: { type: string, format: uuid }
+                suite_version: { type: integer }
+                target: { type: object, properties: { kind: { type: string, enum: [prompt_version, model, endpoint, fixture] }, ref: { type: string } } }
+                limit: { type: integer, minimum: 1 }
+                budget_tokens: { type: integer }
+      responses:
+        '202': { description: Queued, content: { application/json: { schema: { $ref: '#/components/schemas/EvalRun' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/settings:
+    get:
+      tags: [admin]
+      summary: فهرست تنظیمات قابل مشاهده برای کاربر (مقادیر secret هرگز برگردانده نمی‌شوند؛ فقط fingerprint)
+      x-permission: admin.settings.view
+      parameters:
+        - { name: namespace, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Setting' } } } } }
+
+  /admin/settings/{key}:
+    parameters: [ { name: key, in: path, required: true, schema: { type: string } } ]
+    put:
+      tags: [admin]
+      summary: ثبت نسخه جدید → validate → test (در صورت تعریف) → approval برای critical → active
+      x-permission: admin.settings.change
+      x-events: [setting.changed.v1]
+      parameters: [ { $ref: '#/components/parameters/IfMatch' }, { $ref: '#/components/parameters/CorrelationId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: {}
+                environment: { type: string, enum: [dev, stage, prod], default: prod }
+                reason: { type: string }
+      responses:
+        '200': { description: Applied }
+        '202': { description: در انتظار تأیید دوم }
+        '422': { $ref: '#/components/responses/Validation' }
+
+  /admin/settings/{key}/rollback:
+    parameters: [ { name: key, in: path, required: true, schema: { type: string } } ]
+    post:
+      tags: [admin]
+      x-permission: admin.settings.change
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [to_version], properties: { to_version: { type: integer } } } } }
+      responses:
+        '200': { description: Rolled back }
+
+  /admin/secrets/{name}:
+    parameters: [ { name: name, in: path, required: true, schema: { type: string } } ]
+    put:
+      tags: [admin]
+      summary: ثبت/چرخش secret — write-only؛ پاسخ فقط fingerprint (AT-08)
+      x-permission: admin.secrets.rotate
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [value], properties: { value: { type: string, writeOnly: true } } } } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { fingerprint: { type: string }, rotated_at: { type: string, format: date-time } } } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /audit/events:
+    get:
+      tags: [audit]
+      x-permission: admin.audit.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - { name: entity_type, in: query, schema: { type: string } }
+        - { name: entity_id, in: query, schema: { type: string } }
+        - { name: actor_id, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - { name: correlation_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: OK }
+
+components:
+  securitySchemes:
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://sso.example.internal/realms/lavin/.well-known/openid-configuration
+
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    Cursor: { name: cursor, in: query, schema: { type: string } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+    Sort: { name: sort, in: query, schema: { type: string, pattern: '^-?[a-z_]+(,-?[a-z_]+)*$' } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: false, schema: { type: string, maxLength: 128 } }
+    CorrelationId: { name: X-Correlation-ID, in: header, required: false, schema: { type: string, format: uuid } }
+    IfMatch: { name: If-Match, in: header, required: true, schema: { type: string }, description: 'نسخه (ETag) برای optimistic locking' }
+
+  responses:
+    Unauthorized: { description: احراز هویت نشده, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Forbidden: { description: مجوز کافی نیست, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    NotFound: { description: یافت نشد یا خارج از scope, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Conflict: { description: تعارض/تکراری, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    TransitionRejected: { description: 'انتقال توسط guard/BPM رد شد (code=TRANSITION_REJECTED)', content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    PreconditionFailed: { description: نسخه قدیمی است, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+    Validation: { description: داده نامعتبر, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 + کد خطای نسخه‌دار
+      required: [type, title, status, code, correlation_id]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        code: { type: string, examples: [AUTHZ_DENIED, TRANSITION_REJECTED, UNSUPPORTED_CAPABILITY, VERSION_CONFLICT, CONSENT_REQUIRED] }
+        detail: { type: string }
+        errors: { type: array, items: { type: object, properties: { path: { type: string }, message: { type: string } } } }
+        correlation_id: { type: string, format: uuid }
+    Page:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: {} }
+        next_cursor: { type: [string, 'null'] }
+    Me:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        display_name: { type: string }
+        locale: { type: string }
+        tenant_id: { type: string, format: uuid }
+        teams: { type: array, items: { type: string, format: uuid } }
+        permissions: { type: object, additionalProperties: { type: string, enum: [tenant, business_unit, team, assigned, own] } }
+    Source: { type: string, enum: [website, webchat, form, bale, rubika, telegram, phone, email, manual, api, import] }
+    LeadStatus: { type: string, enum: [new, contacted, qualified, disqualified, converted] }
+    Lead:
+      type: object
+      required: [id, status, source, version, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        crm_ref: { type: string, description: شناسه رکورد در Corteza }
+        full_name: { type: string }
+        phone: { type: string, description: E.164 نرمال‌شده }
+        email: { type: string, format: email }
+        company_name: { type: string }
+        status: { $ref: '#/components/schemas/LeadStatus' }
+        source: { $ref: '#/components/schemas/Source' }
+        campaign_id: { type: [string, 'null'], format: uuid }
+        utm: { $ref: '#/components/schemas/Utm' }
+        score: { type: integer, minimum: 0, maximum: 100 }
+        score_override: { type: [integer, 'null'] }
+        owner_id: { type: [string, 'null'], format: uuid }
+        team_id: { type: [string, 'null'], format: uuid }
+        consent_id: { type: [string, 'null'], format: uuid }
+        duplicate_candidates: { type: array, items: { type: object, properties: { id: { type: string }, confidence: { type: number } } } }
+        version: { type: integer }
+        created_at: { type: string, format: date-time }
+    LeadCreate:
+      type: object
+      required: [source]
+      properties:
+        full_name: { type: string, maxLength: 200 }
+        phone: { type: string, maxLength: 32 }
+        email: { type: string, format: email }
+        company_name: { type: string }
+        source: { $ref: '#/components/schemas/Source' }
+        source_ref: { type: string }
+        campaign_id: { type: string, format: uuid }
+        utm: { $ref: '#/components/schemas/Utm' }
+        consent: { type: object, properties: { marketing: { type: boolean }, evidence: { type: object } } }
+    LeadPatch:
+      type: object
+      properties:
+        full_name: { type: string }
+        status: { $ref: '#/components/schemas/LeadStatus' }
+        score_override: { type: [integer, 'null'] }
+        owner_id: { type: string, format: uuid }
+    Utm:
+      type: object
+      properties: { source: { type: string }, medium: { type: string }, campaign: { type: string }, term: { type: string }, content: { type: string } }
+    TimelineItem:
+      type: object
+      required: [type, id, at]
+      properties:
+        type: { type: string }
+        id: { type: string }
+        at: { type: string, format: date-time }
+        summary: { type: string }
+        link: { type: string }
+    Board:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              wip_limit: { type: [integer, 'null'] }
+              tasks: { type: array, items: { $ref: '#/components/schemas/Task' } }
+    Task:
+      type: object
+      required: [id, title, kind, column_id, version]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [standalone, bpm] }
+        title: { type: string }
+        column_id: { type: string, format: uuid }
+        priority: { type: integer, minimum: 1, maximum: 5 }
+        due_at: { type: [string, 'null'], format: date-time }
+        sla_due_at: { type: [string, 'null'], format: date-time }
+        assignee_id: { type: [string, 'null'], format: uuid }
+        related: { type: object, properties: { type: { type: string }, id: { type: string } } }
+        allowed_targets: { type: array, items: { type: string, format: uuid }, description: ستون‌های مجاز برای این کاربر (راهنمای UI) }
+        version: { type: integer }
+    TaskCreate:
+      type: object
+      required: [board_id, title]
+      properties:
+        board_id: { type: string, format: uuid }
+        column_id: { type: string, format: uuid }
+        title: { type: string, maxLength: 300 }
+        description: { type: string }
+        priority: { type: integer }
+        due_at: { type: string, format: date-time }
+        assignee_id: { type: string, format: uuid }
+        related_type: { type: string }
+        related_id: { type: string }
+        parent_id: { type: string, format: uuid }
+    WorkflowDefinition:
+      type: object
+      properties:
+        id: { type: string }
+        key: { type: string }
+        kind: { type: string, enum: [bpmn, dmn] }
+        version: { type: integer }
+        status: { type: string, enum: [draft, validated, pending_approval, deployed, retired] }
+    WorkflowInstance:
+      type: object
+      properties:
+        id: { type: string }
+        definition_key: { type: string }
+        business_key: { type: string }
+        status: { type: string }
+    ChannelAccount:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        provider: { type: string, enum: [bale, rubika, telegram, email, webchat] }
+        display_name: { type: string }
+        status: { type: string, enum: [active, disabled, degraded] }
+        webhook_url: { type: string, format: uri }
+        credential_fingerprint: { type: string }
+        capabilities:
+          type: object
+          additionalProperties:
+            type: object
+            properties: { supported: { type: boolean }, verified_at: { type: [string, 'null'], format: date-time } }
+    ConnectionTestResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        latency_ms: { type: integer }
+        checks: { type: array, items: { type: object, properties: { name: { type: string }, ok: { type: boolean }, detail: { type: string } } } }
+    Call:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        connection_id: { type: string, format: uuid }
+        direction: { type: string, enum: [inbound, outbound, internal] }
+        caller_number: { type: string }
+        disposition: { type: string }
+        started_at: { type: string, format: date-time }
+        ended_at: { type: [string, 'null'], format: date-time }
+        match: { type: object, properties: { contact_id: { type: string }, confidence: { type: number } } }
+        has_recording: { type: boolean }
+    CampaignCreate:
+      type: object
+      required: [name, starts_at]
+      properties:
+        name: { type: string }
+        objective: { type: string }
+        budget: { type: object, properties: { amount: { type: string }, currency: { type: string } } }
+        starts_at: { type: string, format: date-time }
+        ends_at: { type: string, format: date-time }
+        segment_ids: { type: array, items: { type: string, format: uuid } }
+        kpis: { type: array, items: { type: object, properties: { key: { type: string }, target: { type: number } } } }
+    EvalRun:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [queued, running, paused, completed, failed, canceled] }
+        progress: { type: object, properties: { done: { type: integer }, total: { type: integer } } }
+    Setting:
+      type: object
+      properties:
+        key: { type: string }
+        label_fa: { type: string }
+        value: { description: برای secret_ref فقط fingerprint }
+        version: { type: integer }
+        sensitivity: { type: string, enum: [normal, sensitive, critical] }
+        requires_restart: { type: boolean }
