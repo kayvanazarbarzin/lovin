@@ -41,8 +41,8 @@ After installing, commit `skills-lock.json` so every agent restores the same set
 
 ## 5. Local stack
 ```bash
-cp .env.example .env               # fill only local dev values; never commit .env
-docker compose -f infra/compose/docker-compose.yml --profile core up -d
+cp env.example .env                # fill only local dev values; never commit .env
+pnpm stack:up                      # docker compose --env-file .env -f infra/compose/docker-compose.yml --profile core up -d --wait
 pnpm install && pnpm db:migrate && pnpm db:seed
 pnpm dev
 ```

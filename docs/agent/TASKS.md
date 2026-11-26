@@ -38,11 +38,11 @@ Done when: CI green on main; a test PR adding a GPL-3 or unknown-license package
 Evidence: 2026-11-27 — CI green on main @5cb6dce (6/6 jobs: lint·typecheck·test, license gate·SBOM, dependency audit, gitleaks 0 leaks, semgrep OWASP 0 findings, ci-ok); PR #1 adding `chessground` (GPL-3.0-or-later) → license gate ✖, ci-ok ✖, merge BLOCKED (docs/acceptance-evidence/AT-20.md); artifact `sbom-cyclonedx` (CycloneDX 1.6) on main run; `ci-ok` required on `main`.
 
 ### T-005 · Docker Compose core profile
-Status: todo · Size: M · Mode: single · Depends: T-002
+Status: done · Size: M · Mode: single · Depends: T-002
 Read: ADR-000 §3–4, `docs/agent/SETUP.md` §5
 Do: `infra/compose/docker-compose.yml` with profiles; core = postgres16+pgvector (one instance; init script creates DBs `lavin, keycloak, flowable, corteza, payload` with separate owner roles), valkey, nats (JetStream), keycloak; networks `edge, app, data`; healthchecks; images pinned by digest; `.env.example` without real values.
 Done when: `docker compose --profile core up -d` healthy in < 10 min on a clean machine; `psql -l` shows the 5 databases with distinct owners; no image uses `latest`.
-Evidence:
+Evidence: 2026-11-27 — images removed + volumes wiped, `up -d --wait`: all 4 healthy in 314 s incl. pulls (containers ~57 s); `psql -l`: lavin/lavin_migrator, keycloak/keycloak, flowable/flowable, corteza/corteza, payload/payload (all NOSUPERUSER/NOCREATEDB/NOCREATEROLE, CONNECT revoked from PUBLIC — keycloak→lavin denied); pgcrypto 1.3 + vector 0.8.7 in `lavin`; 0 images with `latest` (all tag@sha256); valkey NOAUTH / nats Authorization Violation without creds; ports bound to 127.0.0.1 only.
 
 ### T-006 · Database migration runner
 Status: todo · Size: S · Mode: single · Depends: T-005

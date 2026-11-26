@@ -14,7 +14,9 @@
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
     "audit:licenses": "node tools/license-gate/src/cli.ts",
-    "audit:security": "pnpm audit --audit-level=high"
+    "audit:security": "pnpm audit --audit-level=high",
+    "stack:up": "docker compose --env-file .env -f infra/compose/docker-compose.yml --profile core up -d --wait",
+    "stack:down": "docker compose --env-file .env -f infra/compose/docker-compose.yml --profile core down"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

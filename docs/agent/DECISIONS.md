@@ -28,3 +28,6 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-27 | T-004 | `vite` declared explicitly (required peer of vitest 5): pnpm auto-install-peers pins the newest version and bypasses minimumReleaseAge | pnpm behaviour
 2026-11-27 | T-004 | CI tools: actions pinned by SHA, gitleaks/semgrep Docker images by digest, SBOM via `npx @cyclonedx/cdxgen@12.9.3` in CI only; `ci-ok` aggregate job is the required check | owner chose cdxgen
 2026-11-27 | T-004 | @types/node@22 approved as a root dev dependency for all Node packages | owner
+2026-11-27 | T-005 | Compose core: pgvector 0.8.7-pg16, valkey 8.1.12, nats 2.10.29 (JetStream, user/pass), keycloak 26.8.2 (`start-dev` locally; `start`+TLS in hardening), all tag@digest, ≥7 days old | ADR-000 §4
+2026-11-27 | T-005 | `lavin` DB owner = `lavin_migrator` (DDL); `lavin_app` comes in T-006. Superuser creates pgcrypto/vector at init. `data` network not `internal` so dev tools reach Postgres via 127.0.0.1 | KISS
+2026-11-27 | T-005 | Env template is `env.example` (no leading dot) so the agent read-deny on `.env*` stays strict | security

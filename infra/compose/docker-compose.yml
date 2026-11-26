@@ -1,0 +1,108 @@
+# Lavin local / single-server stack. Usage (from repo root): pnpm stack:up
+# Images are pinned by digest (ADR-000 §4). Host ports bind to 127.0.0.1 only.
+name: lavin
+
+networks:
+  edge: {} # browser-facing (Keycloak login, later web)
+  app: {} # api / web / worker ↔ engines
+  data: {} # databases and brokers
+
+volumes:
+  postgres-data: {}
+  valkey-data: {}
+  nats-data: {}
+
+services:
+  postgres:
+    profiles: [core]
+    image: pgvector/pgvector:0.8.7-pg16@sha256:484e838076e04939d27d3e176e91c86eea96236126023be8d3059761122e579f
+    restart: unless-stopped
+    networks: [data]
+    ports: ['127.0.0.1:${POSTGRES_PORT:-5432}:5432']
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set in .env}
+      LAVIN_DB_PASSWORD: ${LAVIN_DB_PASSWORD:?set in .env}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set in .env}
+      FLOWABLE_DB_PASSWORD: ${FLOWABLE_DB_PASSWORD:?set in .env}
+      CORTEZA_DB_PASSWORD: ${CORTEZA_DB_PASSWORD:?set in .env}
+      PAYLOAD_DB_PASSWORD: ${PAYLOAD_DB_PASSWORD:?set in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  valkey:
+    profiles: [core]
+    image: valkey/valkey:8.1.12-alpine@sha256:9971099af41c36e887aabdfe22b80c0fe45df949163dfc9cb434febc57cfc3fc
+    restart: unless-stopped
+    networks: [data]
+    ports: ['127.0.0.1:${VALKEY_PORT:-6379}:6379']
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD:?set in .env}
+      REDISCLI_AUTH: ${VALKEY_PASSWORD}
+    command: ['sh', '-c', 'exec valkey-server --appendonly yes --requirepass "$$VALKEY_PASSWORD"']
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'valkey-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  nats:
+    profiles: [core]
+    image: nats:2.10.29-alpine@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927
+    restart: unless-stopped
+    networks: [data]
+    ports: ['127.0.0.1:${NATS_PORT:-4222}:4222']
+    environment:
+      NATS_USER: lavin
+      NATS_PASSWORD: ${NATS_PASSWORD:?set in .env}
+    # Monitoring port 8222 stays inside the container (healthcheck only).
+    command:
+      ['sh', '-c', 'exec nats-server -js -sd /data -m 8222 --user "$$NATS_USER" --pass "$$NATS_PASSWORD"']
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- "http://127.0.0.1:8222/healthz?js-enabled-only=true" | grep -q ok']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    profiles: [core]
+    image: quay.io/keycloak/keycloak:26.8.2@sha256:7e66a96e4739239070aeaf72e4c5decf0f7f682cfc725b9f7ea2b336eaba38b3
+    restart: unless-stopped
+    networks: [edge, app, data]
+    ports: ['127.0.0.1:${KEYCLOAK_PORT:-8080}:8080']
+    # Dev mode for local/PoC; production uses `start` with TLS + hostname (hardening epic).
+    command: ['start-dev']
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set in .env}
+      KC_HEALTH_ENABLED: 'true'
+      KC_HTTP_ENABLED: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # The image has no curl/wget: probe the management port with bash /dev/tcp.
+      test:
+        - CMD-SHELL
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"UP"' <&3
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
