@@ -31,3 +31,6 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-27 | T-005 | Compose core: pgvector 0.8.7-pg16, valkey 8.1.12, nats 2.10.29 (JetStream, user/pass), keycloak 26.8.2 (`start-dev` locally; `start`+TLS in hardening), all tag@digest, ≥7 days old | ADR-000 §4
 2026-11-27 | T-005 | `lavin` DB owner = `lavin_migrator` (DDL); `lavin_app` comes in T-006. Superuser creates pgcrypto/vector at init. `data` network not `internal` so dev tools reach Postgres via 127.0.0.1 | KISS
 2026-11-27 | T-005 | Env template is `env.example` (no leading dot) so the agent read-deny on `.env*` stays strict | security
+2026-11-27 | T-006 | Own ~60-line runner (`tools/db-migrate`) on `pg` (MIT): advisory lock, sha256 checksum per file (edited applied migration = error), one transaction per file incl. bookkeeping in `conf.schema_migrations`; file-level BEGIN/COMMIT stripped | owner chose pg; KISS
+2026-11-27 | T-006 | Roles: `lavin_migrator` owns DB (DDL), `lavin_app` created at bootstrap by superuser; grants in migration 0002 (DML; audit SELECT+INSERT only; default privileges for future tables) | AGENTS.md §5
+2026-11-27 | T-006 | Integration tests pick an explicit free host port and disable Ryuk on Windows only: Docker Desktop 29 does not bind `HostPort: "0"` | env quirk

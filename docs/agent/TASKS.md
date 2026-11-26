@@ -45,11 +45,11 @@ Done when: `docker compose --profile core up -d` healthy in < 10 min on a clean 
 Evidence: 2026-11-27 — images removed + volumes wiped, `up -d --wait`: all 4 healthy in 314 s incl. pulls (containers ~57 s); `psql -l`: lavin/lavin_migrator, keycloak/keycloak, flowable/flowable, corteza/corteza, payload/payload (all NOSUPERUSER/NOCREATEDB/NOCREATEROLE, CONNECT revoked from PUBLIC — keycloak→lavin denied); pgcrypto 1.3 + vector 0.8.7 in `lavin`; 0 images with `latest` (all tag@sha256); valkey NOAUTH / nats Authorization Violation without creds; ports bound to 127.0.0.1 only.
 
 ### T-006 · Database migration runner
-Status: todo · Size: S · Mode: single · Depends: T-005
+Status: done · Size: S · Mode: single · Depends: T-005
 Read: `.github/instructions/database.instructions.md`, `database/migrations/0001_platform_core.sql` (header only)
 Do: plain-SQL migration runner (e.g. `postgres-shift` or a 60-line script) with a `schema_migrations` table in `conf`; scripts `db:migrate`, `db:test-migrations` (fresh DB in Testcontainers); app roles: `lavin_app` (DML, INSERT-only on `logs.audit_event`), `lavin_migrator` (DDL).
 Done when: `pnpm db:test-migrations` applies 0001 on an empty DB; `lavin_app` cannot UPDATE/DELETE `logs.audit_event` or run DDL (tested).
-Evidence:
+Evidence: 2026-11-27 — `pnpm db:test-migrations` (Testcontainers, pgvector 0.8.7-pg16 digest): 9/9 pass — 0001+0002 applied on empty DB, re-run no-op, edited migration rejected (checksum), lavin_app INSERT/SELECT audit ok; UPDATE/DELETE/TRUNCATE audit, CREATE/ALTER table, read conf.schema_migrations → 42501. Real stack: `db:migrate` applied 0001, 0002 (44 tables), second run "up to date"; psql as lavin_app DELETE audit → permission denied.
 
 ### T-007 · Events package (outbox/inbox)
 Status: todo · Size: M · Mode: single · Depends: T-006

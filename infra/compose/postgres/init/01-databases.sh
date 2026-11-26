@@ -21,7 +21,10 @@ create_database corteza "$CORTEZA_DB_PASSWORD"
 create_database payload "$PAYLOAD_DB_PASSWORD"
 
 # Extensions that need superuser; migrations use CREATE EXTENSION IF NOT EXISTS.
-psql -v ON_ERROR_STOP=1 -U postgres -d lavin <<'SQL'
+# lavin_app: runtime role; table grants come from migration 0002 (DML only, audit INSERT-only).
+psql -v ON_ERROR_STOP=1 -U postgres -d lavin -v app_password="$LAVIN_APP_DB_PASSWORD" <<'SQL'
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE ROLE lavin_app LOGIN PASSWORD :'app_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+GRANT CONNECT ON DATABASE lavin TO lavin_app;
 SQL
