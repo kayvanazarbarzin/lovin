@@ -36,14 +36,19 @@ describe('findViolations', () => {
   });
 
   it('AT-20 an unknown-license prod package fails the gate', () => {
-    const violations = findViolations([{ name: 'mystery', license: 'Unknown', scope: 'prod' }], policy);
+    const violations = findViolations(
+      [{ name: 'mystery', license: 'Unknown', scope: 'prod' }],
+      policy,
+    );
     expect(violations).toHaveLength(1);
   });
 
   it('lets a reviewed dev exception pass but never in prod', () => {
     const dev = { name: '@img/sharp-libvips', license: 'LGPL-3.0-or-later', scope: 'dev' as const };
     expect(findViolations([dev], policy)).toEqual([]);
-    expect(findViolations([{ ...dev, scope: 'prod' }], policy)[0]?.rule).toBe('not-allowed-in-prod');
+    expect(findViolations([{ ...dev, scope: 'prod' }], policy)[0]?.rule).toBe(
+      'not-allowed-in-prod',
+    );
   });
 
   it('does not let an exception cover a changed license', () => {

@@ -13,6 +13,7 @@ export default tseslint.config(
       'max-lines-per-function': ['error', { max: 40, skipBlankLines: true, skipComments: true }],
       'max-depth': ['error', 3],
       'max-params': ['error', 4],
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
   {

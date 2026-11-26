@@ -16,7 +16,10 @@ function listLicenses(prodOnly: boolean): Map<string, string> {
   const [command, commandArgs] = isScript
     ? [process.execPath, [pnpmEntry, ...args]]
     : [pnpmEntry, args];
-  const output = execFileSync(command, commandArgs, { encoding: 'utf8', maxBuffer: 1 << 28 }).trim();
+  const output = execFileSync(command, commandArgs, {
+    encoding: 'utf8',
+    maxBuffer: 1 << 28,
+  }).trim();
   const byName = new Map<string, string>();
   if (!output.startsWith('{')) return byName; // pnpm prints a sentence when there are no packages
   const grouped = JSON.parse(output) as Record<string, PnpmLicenseEntry[]>;
@@ -43,10 +46,14 @@ const violations = findViolations(packages, policy);
 const prodCount = packages.filter((pkg) => pkg.scope === 'prod').length;
 console.log(`License gate: ${packages.length} packages (${prodCount} prod), policy ${policyPath}`);
 for (const violation of violations) {
-  console.error(`✖ ${violation.rule}: ${violation.name} [${violation.scope}] — ${violation.license}`);
+  console.error(
+    `✖ ${violation.rule}: ${violation.name} [${violation.scope}] — ${violation.license}`,
+  );
 }
 if (violations.length > 0) {
-  console.error(`${violations.length} license violation(s). See docs/compliance/LICENSE-DECISION.md §4.`);
+  console.error(
+    `${violations.length} license violation(s). See docs/compliance/LICENSE-DECISION.md §4.`,
+  );
   process.exit(1);
 }
 console.log('✔ all licenses allowed');

@@ -75,7 +75,9 @@ export async function migrate(client: ClientBase, directory: string): Promise<st
         await applyOne(client, file);
         done.push(file.name);
       } else if (checksum !== file.checksum) {
-        throw new Error(`${file.name} was edited after it was applied; add a new migration instead`);
+        throw new Error(
+          `${file.name} was edited after it was applied; add a new migration instead`,
+        );
       }
     }
     return done;

@@ -18,7 +18,8 @@
     "stack:up": "docker compose --env-file .env -f infra/compose/docker-compose.yml --profile core up -d --wait",
     "stack:down": "docker compose --env-file .env -f infra/compose/docker-compose.yml --profile core down",
     "db:migrate": "node --env-file=.env tools/db-migrate/src/cli.ts",
-    "db:test-migrations": "pnpm --filter @lavin/db-migrate test:integration"
+    "db:test-migrations": "pnpm --filter @lavin/db-migrate test:integration",
+    "events:replay": "node --env-file=.env packages/events/src/cli.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

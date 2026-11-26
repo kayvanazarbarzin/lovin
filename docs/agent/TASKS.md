@@ -52,11 +52,11 @@ Done when: `pnpm db:test-migrations` applies 0001 on an empty DB; `lavin_app` ca
 Evidence: 2026-11-27 — `pnpm db:test-migrations` (Testcontainers, pgvector 0.8.7-pg16 digest): 9/9 pass — 0001+0002 applied on empty DB, re-run no-op, edited migration rejected (checksum), lavin_app INSERT/SELECT audit ok; UPDATE/DELETE/TRUNCATE audit, CREATE/ALTER table, read conf.schema_migrations → 42501. Real stack: `db:migrate` applied 0001, 0002 (44 tables), second run "up to date"; psql as lavin_app DELETE audit → permission denied.
 
 ### T-007 · Events package (outbox/inbox)
-Status: todo · Size: M · Mode: single · Depends: T-006
+Status: done · Size: M · Mode: single · Depends: T-006
 Read: ADR-000 §3, PRD §15.3 (search "رویداد استاندارد"), migration `evnt` section
 Do: `packages/events`: envelope Zod schema, `writeOutbox(tx, event)`, relay worker (poll + LISTEN/NOTIFY) → NATS JetStream with retries + jitter, `consume(consumerName, handler)` with `evnt.inbox` dedupe and dead-letter after N attempts, replay CLI.
 Done when: integration tests: duplicate delivery processed once; kill relay mid-batch → no loss, no duplicate side effect (AT-13 core); DLQ row after poison message.
-Evidence:
+Evidence: 2026-11-27 — `pnpm --filter @lavin/events test:integration` 3/3 (real PG + NATS, as lavin_app): duplicate delivery → 1 side effect; relay backend terminated after 6 sends → 20 rows unpublished, new relay drains, 20 side effects / 20 distinct (AT-13 core, docs/acceptance-evidence/AT-13.md); poison → 1 dead_letter row after 3 attempts. Unit 4/4. Replay CLI: `pnpm events:replay dead-letters [consumer] | outbox <since> [until]`.
 
 ### T-008 · Keycloak realm as code
 Status: todo · Size: M · Mode: single · Depends: T-005

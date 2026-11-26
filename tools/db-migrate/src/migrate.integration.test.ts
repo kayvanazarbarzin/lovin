@@ -50,7 +50,9 @@ async function bootstrap(): Promise<void> {
   });
   await withClient(lavinAdmin, async (c) => {
     await c.query('CREATE EXTENSION pgcrypto; CREATE EXTENSION vector');
-    await c.query('REVOKE ALL ON DATABASE lavin FROM PUBLIC; GRANT CONNECT ON DATABASE lavin TO lavin_app');
+    await c.query(
+      'REVOKE ALL ON DATABASE lavin FROM PUBLIC; GRANT CONNECT ON DATABASE lavin TO lavin_app',
+    );
   });
 }
 
