@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.15.0)
+      '@types/node':
+        specifier: '22'
+        version: 22.20.7
       dependency-cruiser:
         specifier: ^18.9.0
         version: 18.9.0
@@ -25,7 +28,7 @@ importers:
         version: 3.10.1
       ruflo:
         specifier: 3.80.8
-        version: 3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@26.6.11)(metaharness@0.4.25)
+        version: 3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@22.20.7)(metaharness@0.4.25)
       turbo:
         specifier: ^2.11.13
         version: 2.11.13
@@ -37,7 +40,7 @@ importers:
         version: 8.74.0(eslint@10.15.0)(typescript@6.0.3)
       vitest:
         specifier: ^5.1.2
-        version: 5.1.2(@opentelemetry/api@1.10.0)(@types/node@26.6.11)(vite@8.4.0(@types/node@26.6.11)(yaml@2.9.1))
+        version: 5.1.2(@opentelemetry/api@1.10.0)(@types/node@22.20.7)(vite@8.4.0(@types/node@22.20.7)(yaml@2.9.1))
 
   apps/api: {}
 
@@ -74,6 +77,8 @@ importers:
   services/eval-service: {}
 
   services/workflow-facade: {}
+
+  tools/license-gate: {}
 
 packages:
 
@@ -1673,8 +1678,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/node@26.6.11':
-    resolution: {integrity: sha512-uUyQ2XLEz+EXh34lmS3GhKrkqn/8FU7KUiKRpk347At2bmnMVWss45yz8b4FG/tUtmV1tV/+TVkITItPROyeeQ==}
+  '@types/node@22.20.7':
+    resolution: {integrity: sha512-F/Mcc4pD3YwXQCG50hb8BjB5RmrOere6hge7n2XHf0V8tpkZOVEjwYv9Ql7n0MpMn8Bv7+q12P9w6UHsBm0Sfw==}
 
   '@types/retry@0.12.0':
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
@@ -3662,8 +3667,8 @@ packages:
     resolution: {integrity: sha512-yu26mwteFYzBAot7KVMqFGCVpsF6g8wXfJzQUHvu1no3+rRRSFcSV2nKeYvNPLD2J4b08jYBDhHUjeH0ygIl9w==}
     hasBin: true
 
-  undici-types@8.9.0:
-    resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   undici@7.30.2:
     resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
@@ -4035,24 +4040,24 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@claude-flow/aidefence@3.2.2(agentdb@3.10.1(@types/node@26.6.11)(zod@4.6.7))':
+  '@claude-flow/aidefence@3.2.2(agentdb@3.10.1(@types/node@22.20.7)(zod@4.6.7))':
     optionalDependencies:
-      agentdb: 3.10.1(@types/node@26.6.11)(zod@4.6.7)
+      agentdb: 3.10.1(@types/node@22.20.7)(zod@4.6.7)
     optional: true
 
   '@claude-flow/cli-core@3.7.8': {}
 
-  '@claude-flow/cli@3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@26.6.11)(metaharness@0.4.25)':
+  '@claude-flow/cli@3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@22.20.7)(metaharness@0.4.25)':
     dependencies:
       '@claude-flow/cli-core': 3.7.8
-      '@claude-flow/neural': 3.1.2(@types/node@26.6.11)(zod@4.6.7)
+      '@claude-flow/neural': 3.1.2(@types/node@22.20.7)(zod@4.6.7)
       '@claude-flow/shared': 3.0.10
       '@electron/asar': 4.3.4
       '@iarna/toml': 2.2.5
       '@metaharness/darwin': 0.16.0(@ruvector/rvf@0.4.12)
       '@noble/ed25519': 2.3.0
       '@ruvector/rabitq-wasm': 0.1.2
-      agentic-flow: 3.5.5(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/ruvllm@4.2.2)(@types/node@26.6.11)
+      agentic-flow: 3.5.5(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/ruvllm@4.2.2)(@types/node@22.20.7)
       ajv: 8.20.0
       bcryptjs: 3.0.3
       chalk: 5.6.2
@@ -4063,7 +4068,7 @@ snapshots:
       fast-uri: 3.1.9
       fs-extra: 11.4.1
       helmet: 7.2.0
-      inquirer: 9.3.8(@types/node@26.6.11)
+      inquirer: 9.3.8(@types/node@22.20.7)
       semver: 7.7.3
       sql.js: 1.17.0
       typescript: 5.9.3
@@ -4072,8 +4077,8 @@ snapshots:
       zod: 4.6.7
     optionalDependencies:
       '@agntcy/slim-bindings': 2.1.1
-      '@claude-flow/aidefence': 3.2.2(agentdb@3.10.1(@types/node@26.6.11)(zod@4.6.7))
-      '@claude-flow/memory': 3.4.0(@types/node@26.6.11)(zod@4.6.7)
+      '@claude-flow/aidefence': 3.2.2(agentdb@3.10.1(@types/node@22.20.7)(zod@4.6.7))
+      '@claude-flow/memory': 3.4.0(@types/node@22.20.7)(zod@4.6.7)
       '@metaharness/flywheel': 0.1.15
       '@metaharness/radio': 0.1.1
       '@metaharness/router': 0.3.3(@ruvector/tiny-dancer@0.1.26)
@@ -4081,7 +4086,7 @@ snapshots:
       '@napi-rs/keyring': 1.3.0
       '@ruvector/learning-wasm': 0.1.29
       agent-booster: 0.2.3
-      agentdb: 3.10.1(@types/node@26.6.11)(zod@4.6.7)
+      agentdb: 3.10.1(@types/node@22.20.7)(zod@4.6.7)
       better-sqlite3: 12.11.1
       metaharness: 0.4.25
       nostr-tools: 2.26.1(typescript@5.9.3)
@@ -4114,10 +4119,10 @@ snapshots:
       - sury
       - utf-8-validate
 
-  '@claude-flow/memory@3.4.0(@types/node@26.6.11)(zod@4.6.7)':
+  '@claude-flow/memory@3.4.0(@types/node@22.20.7)(zod@4.6.7)':
     dependencies:
       '@claude-flow/security': 3.0.8
-      agentdb: 3.10.1(@types/node@26.6.11)(zod@4.6.7)
+      agentdb: 3.10.1(@types/node@22.20.7)(zod@4.6.7)
       sql.js: 1.17.0
     optionalDependencies:
       '@ruvnet/sublinear-core': 1.0.1
@@ -4133,12 +4138,12 @@ snapshots:
       - supports-color
       - zod
 
-  '@claude-flow/neural@3.1.2(@types/node@26.6.11)(zod@4.6.7)':
+  '@claude-flow/neural@3.1.2(@types/node@22.20.7)(zod@4.6.7)':
     dependencies:
-      '@claude-flow/memory': 3.4.0(@types/node@26.6.11)(zod@4.6.7)
+      '@claude-flow/memory': 3.4.0(@types/node@22.20.7)(zod@4.6.7)
       '@ruvector/sona': 0.1.11
     optionalDependencies:
-      agentdb: 3.10.1(@types/node@26.6.11)(zod@4.6.7)
+      agentdb: 3.10.1(@types/node@22.20.7)(zod@4.6.7)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - '@metaharness/kernel'
@@ -4267,13 +4272,13 @@ snapshots:
 
   '@huggingface/tokenizers@0.2.0': {}
 
-  '@huggingface/transformers@4.3.2(@types/node@26.6.11)':
+  '@huggingface/transformers@4.3.2(@types/node@22.20.7)':
     dependencies:
       '@huggingface/jinja': 0.5.13
       '@huggingface/tokenizers': 0.2.0
       onnxruntime-node: 1.30.0
       onnxruntime-web: 1.31.0-dev.20260914-8d85527a0
-      sharp: 0.35.5(@types/node@26.6.11)
+      sharp: 0.35.5(@types/node@22.20.7)
     transitivePeerDependencies:
       - '@types/node'
 
@@ -4460,12 +4465,12 @@ snapshots:
   '@img/sharp-win32-x64@0.35.5':
     optional: true
 
-  '@inquirer/external-editor@1.0.3(@types/node@26.6.11)':
+  '@inquirer/external-editor@1.0.3(@types/node@22.20.7)':
     dependencies:
       chardet: 2.2.0
       iconv-lite: 0.7.3
     optionalDependencies:
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
 
   '@inquirer/figures@1.0.15': {}
 
@@ -5482,13 +5487,13 @@ snapshots:
 
   '@types/http-proxy@1.17.17':
     dependencies:
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@26.6.11':
+  '@types/node@22.20.7':
     dependencies:
-      undici-types: 8.9.0
+      undici-types: 6.21.0
 
   '@types/retry@0.12.0': {}
 
@@ -5497,7 +5502,7 @@ snapshots:
 
   '@types/ws@8.18.2':
     dependencies:
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
 
   '@typescript-eslint/eslint-plugin@8.74.0(@typescript-eslint/parser@8.74.0(eslint@10.15.0)(typescript@6.0.3))(eslint@10.15.0)(typescript@6.0.3)':
     dependencies:
@@ -5633,14 +5638,14 @@ snapshots:
       '@ubjs/node-win32-x64-msvc': 0.31.0-3
     optional: true
 
-  '@vitest/mocker@5.1.2(vite@8.4.0(@types/node@26.6.11)(yaml@2.9.1))':
+  '@vitest/mocker@5.1.2(vite@8.4.0(@types/node@22.20.7)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.1.2
       estree-walker: 3.0.3
       magic-string: 1.4.5
     optionalDependencies:
-      vite: 8.4.0(@types/node@26.6.11)(yaml@2.9.1)
+      vite: 8.4.0(@types/node@22.20.7)(yaml@2.9.1)
 
   '@vitest/spy@5.1.2': {}
 
@@ -5682,7 +5687,7 @@ snapshots:
       - supports-color
     optional: true
 
-  agentdb@3.10.1(@types/node@26.6.11)(zod@4.6.7):
+  agentdb@3.10.1(@types/node@22.20.7)(zod@4.6.7):
     dependencies:
       '@modelcontextprotocol/sdk': 1.32.2(zod@4.6.7)
       '@opentelemetry/api': 1.10.0
@@ -5694,7 +5699,7 @@ snapshots:
       semver: 7.8.6
       sql.js: 1.17.0
     optionalDependencies:
-      '@huggingface/transformers': 4.3.2(@types/node@26.6.11)
+      '@huggingface/transformers': 4.3.2(@types/node@22.20.7)
       '@opentelemetry/resources': 2.12.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-node': 0.220.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/semantic-conventions': 1.45.0
@@ -5717,7 +5722,7 @@ snapshots:
       argon2: 0.44.0
       better-sqlite3: 12.11.1
       hnswlib-node: 3.0.0
-      inquirer: 9.3.8(@types/node@26.6.11)
+      inquirer: 9.3.8(@types/node@22.20.7)
       ruvector: 0.3.20(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(zod@4.6.7)
       ruvector-attention-wasm: 2.1.0
       ruvector-graph-transformer-wasm: 2.0.4
@@ -5732,17 +5737,17 @@ snapshots:
       - supports-color
       - zod
 
-  agentic-flow@3.5.5(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/ruvllm@4.2.2)(@types/node@26.6.11):
+  agentic-flow@3.5.5(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/ruvllm@4.2.2)(@types/node@22.20.7):
     dependencies:
       '@anthropic-ai/claude-agent-sdk': 0.1.77(zod@4.6.7)
       '@anthropic-ai/sdk': 0.65.0(zod@4.6.7)
       '@google/genai': 1.52.0(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))
-      '@huggingface/transformers': 4.3.2(@types/node@26.6.11)
+      '@huggingface/transformers': 4.3.2(@types/node@22.20.7)
       '@metaharness/router': 0.3.3(@ruvector/tiny-dancer@0.1.26)
       '@ruvector/edge-full': 0.1.2
       '@ruvector/tiny-dancer': 0.1.26
       '@supabase/supabase-js': 2.119.2(@opentelemetry/api@1.10.0)
-      agentdb: 3.10.1(@types/node@26.6.11)(zod@4.6.7)
+      agentdb: 3.10.1(@types/node@22.20.7)(zod@4.6.7)
       axios: 1.21.1
       dotenv: 16.6.1
       express: 5.3.0
@@ -5769,7 +5774,7 @@ snapshots:
       aidefence: 3.2.1
       better-sqlite3: 11.10.0
       onnxruntime-node: 1.31.1
-      sharp: 0.35.5(@types/node@26.6.11)
+      sharp: 0.35.5(@types/node@22.20.7)
       sql.js: 1.17.0
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -6697,9 +6702,9 @@ snapshots:
 
   ini@4.1.1: {}
 
-  inquirer@9.3.8(@types/node@26.6.11):
+  inquirer@9.3.8(@types/node@22.20.7):
     dependencies:
-      '@inquirer/external-editor': 1.0.3(@types/node@26.6.11)
+      '@inquirer/external-editor': 1.0.3(@types/node@22.20.7)
       '@inquirer/figures': 1.0.15
       ansi-escapes: 4.3.2
       cli-width: 4.1.0
@@ -7194,7 +7199,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.2
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
       long: 5.3.2
 
   proxy-addr@2.0.8:
@@ -7319,9 +7324,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ruflo@3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@26.6.11)(metaharness@0.4.25):
+  ruflo@3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@22.20.7)(metaharness@0.4.25):
     dependencies:
-      '@claude-flow/cli': 3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@26.6.11)(metaharness@0.4.25)
+      '@claude-flow/cli': 3.80.8(@metaharness/router@0.3.3(@ruvector/tiny-dancer@0.1.26))(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))(@opentelemetry/api@1.10.0)(@ruvector/router@0.1.34)(@ruvector/ruvllm@4.2.2)(@ruvector/rvf@0.4.12)(@types/node@22.20.7)(metaharness@0.4.25)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - '@metaharness/kernel'
@@ -7528,7 +7533,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  sharp@0.35.5(@types/node@26.6.11):
+  sharp@0.35.5(@types/node@22.20.7):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -7559,7 +7564,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.5
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
 
   shebang-command@2.0.0:
     dependencies:
@@ -7794,7 +7799,7 @@ snapshots:
 
   ulid@3.0.2: {}
 
-  undici-types@8.9.0: {}
+  undici-types@6.21.0: {}
 
   undici@7.30.2: {}
 
@@ -7814,7 +7819,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@8.4.0(@types/node@26.6.11)(yaml@2.9.1):
+  vite@8.4.0(@types/node@22.20.7)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -7822,15 +7827,15 @@ snapshots:
       rolldown: 1.3.4
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
       fsevents: 2.3.3
       napi-windows-process-start-time: 0.1.0
       yaml: 2.9.1
 
-  vitest@5.1.2(@opentelemetry/api@1.10.0)(@types/node@26.6.11)(vite@8.4.0(@types/node@26.6.11)(yaml@2.9.1)):
+  vitest@5.1.2(@opentelemetry/api@1.10.0)(@types/node@22.20.7)(vite@8.4.0(@types/node@22.20.7)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.1.2(vite@8.4.0(@types/node@26.6.11)(yaml@2.9.1))
+      '@vitest/mocker': 5.1.2(vite@8.4.0(@types/node@22.20.7)(yaml@2.9.1))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -7841,11 +7846,11 @@ snapshots:
       tinybench: 6.2.5
       tinyexec: 1.4.0
       tinyglobby: 0.2.17
-      vite: 8.4.0(@types/node@26.6.11)(yaml@2.9.1)
+      vite: 8.4.0(@types/node@22.20.7)(yaml@2.9.1)
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@opentelemetry/api': 1.10.0
-      '@types/node': 26.6.11
+      '@types/node': 22.20.7
     transitivePeerDependencies:
       - msw
 

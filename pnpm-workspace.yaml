@@ -2,3 +2,10 @@ packages:
   - apps/*
   - services/*
   - packages/*
+  - tools/*
+
+# Supply-chain guards (Semgrep OWASP A08): skip versions published < 7 days ago,
+# refuse trust downgrades, and block transitive deps from git/tarball URLs.
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
+blockExoticSubdeps: true

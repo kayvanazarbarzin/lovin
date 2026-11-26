@@ -6,6 +6,10 @@
     },
     "test": {
       "outputs": []
+    },
+    "test:integration": {
+      "outputs": [],
+      "cache": false
     }
   }
 }

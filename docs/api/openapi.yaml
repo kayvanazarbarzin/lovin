@@ -221,7 +221,7 @@ paths:
                 target_column_id: { type: string, format: uuid }
                 expected_version: { type: integer }
                 position: { type: number }
-                form_data: { type: object, description: داده فرم user task در صورت نیاز outcome }
+                form_data: { type: object, description: 'داده فرم user task در صورت نیاز outcome' }
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Task' } } } }
         '409': { $ref: '#/components/responses/TransitionRejected' }

@@ -2,19 +2,23 @@
   "name": "lavin",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.34.9",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "lint": "eslint . && pnpm lint:deps",
-    "lint:deps": "depcruise apps services packages",
+    "lint:deps": "depcruise apps services packages tools",
     "format": "prettier --write .",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "audit:licenses": "node tools/license-gate/src/cli.ts",
+    "audit:security": "pnpm audit --audit-level=high"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "22",
     "dependency-cruiser": "^18.9.0",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",

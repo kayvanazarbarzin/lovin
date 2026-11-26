@@ -3,7 +3,8 @@
 Run once per developer machine (VS Code + coding agent). Development tooling only — none of this ships in production images.
 
 ## 1. Prerequisites
-- Node.js 22 LTS, pnpm 9 (`corepack enable`), Docker + Compose v2, Git.
+- Node.js 22 LTS (`.nvmrc`), pnpm 10 (pinned in `packageManager`; `corepack enable`), Docker + Compose v2, Git.
+- pnpm supply-chain guards live in `pnpm-workspace.yaml` (7-day `minimumReleaseAge`, `trustPolicy`, `blockExoticSubdeps`); dependency build scripts are blocked unless approved.
 - VS Code extensions: GitHub Copilot Chat and/or Claude Code, ESLint, Prettier, Tailwind CSS IntelliSense, Playwright Test, PostgreSQL client of choice.
 
 ## 2. Ruflo skill (global, owner decision)
