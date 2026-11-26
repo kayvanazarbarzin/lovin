@@ -31,11 +31,11 @@ Evidence: 2026-11-26 — `npx skills list` = exactly the 9 recommended skills (s
 Amended 2026-11-27 (owner, during T-004): Ruflo removed from devDependencies (its tree fails pnpm trust/age guards); run as `npx -y ruflo@3.80.8` → `ruflo v3.80.8`; `cost-compact-context` removed (works only inside the Ruflo repo) → 8 skills in `skills-lock.json`.
 
 ### T-004 · CI pipeline
-Status: todo · Size: M · Mode: single · Depends: T-002
+Status: done · Size: M · Mode: single · Depends: T-002
 Read: AGENTS.md §7–8, LICENSE-DECISION §4
 Do: GitHub Actions: lint, typecheck, unit tests, integration tests (Testcontainers), Gitleaks, Semgrep (OWASP rules), `pnpm audit --audit-level=high`, CycloneDX SBOM artifact, license allowlist gate (fail on unknown/AGPL/SSPL/BUSL); PR template with fields from PRD §20.4; add the CI job as a required status check on `main` protection.
 Done when: CI green on main; a test PR adding a GPL-3 or unknown-license package fails the license job (AT-20); SBOM artifact downloadable.
-Evidence:
+Evidence: 2026-11-27 — CI green on main @5cb6dce (6/6 jobs: lint·typecheck·test, license gate·SBOM, dependency audit, gitleaks 0 leaks, semgrep OWASP 0 findings, ci-ok); PR #1 adding `chessground` (GPL-3.0-or-later) → license gate ✖, ci-ok ✖, merge BLOCKED (docs/acceptance-evidence/AT-20.md); artifact `sbom-cyclonedx` (CycloneDX 1.6) on main run; `ci-ok` required on `main`.
 
 ### T-005 · Docker Compose core profile
 Status: todo · Size: M · Mode: single · Depends: T-002

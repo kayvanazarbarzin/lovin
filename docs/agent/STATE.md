@@ -1,25 +1,32 @@
 # STATE — read me first (keep ≤ 60 lines; rewrite at the end of every session)
 
-**Updated:** 2026-11-26 after T-001
+**Updated:** 2026-11-27 after T-004
 **Phase:** Sprint 0
-**Active task:** none — next is `T-002` in `docs/agent/TASKS.md`
+**Active task:** none — next is `T-005` (Docker Compose core profile)
 
 ## Done so far
-- PRD analysed; repo audit, license decision, ADR-000..005, OpenAPI draft, permission matrix, first migration (`database/migrations/0001_platform_core.sql`, 12 schemas / 43 tables, tested on PostgreSQL 16).
-- Owner decisions recorded in `docs/agent/DECISIONS.md`.
-- T-001 done: repo https://github.com/kayvanazarbarzin/lovin (public), `.gitignore`, `.editorconfig`, proprietary `LICENSE`, `main` protected (PR + 1 review, admins bypass, no force-push).
-- Ruflo skill installed globally (`~/.agents/skills/ruflo`, linked into `~/.claude/skills`).
+- Planning docs: PRD analysis, ADR-000..005, OpenAPI draft, permission matrix, migration `0001_platform_core.sql`.
+- T-001 repo https://github.com/kayvanazarbarzin/lovin (public, proprietary LICENSE); `main` protected: PR + 1 review, required check `ci-ok`, admins bypass (agent commits directly to main).
+- T-002 monorepo: pnpm workspaces (`apps/*`, `services/*`, `packages/*`, `tools/*`), Turborepo, TS 6 strict, ESLint flat (AGENTS size limits enforced), Prettier, Vitest 5, dependency-cruiser boundaries (`pnpm lint:deps`).
+- T-003 Ruflo: fork tag `lavin-pin-2026-11-26`; 8 project skills in `.agents/skills` (`skills-lock.json`). Ruflo is NOT a dependency — run `npx -y ruflo@3.80.8` (AGENTS.md §9).
+- T-004 CI (`.github/workflows/ci.yml`): lint/typecheck/test/test:integration, license gate (`tools/license-gate`, policy `docs/compliance/license-policy.json`), CycloneDX SBOM artifact, pnpm audit, gitleaks, semgrep OWASP; AT-20 evidence in `docs/acceptance-evidence/AT-20.md`.
+
+## Toolchain facts (owner decisions)
+- Node 22 (`.nvmrc`; local machine runs Node 24 — fine), pnpm 10.34.9 via `packageManager`.
+- `pnpm-workspace.yaml` guards: `minimumReleaseAge` 7 days, `trustPolicy: no-downgrade`, `blockExoticSubdeps`. Use caret ranges that allow ≥7-day-old versions; pnpm picks the newest mature one.
+- If a required peer is missing, declare it explicitly (auto-install-peers bypasses the age guard).
+- New deps: install without asking only if named in the task's `Do:`; otherwise ask the owner. @types/node@22 pre-approved.
+- Local installs need `CI=true` (non-TTY) when pnpm wants to purge node_modules.
 
 ## Next 3 tasks
-1. T-002 Monorepo skeleton (pnpm + Turborepo + TS strict) — size M, use plan mode.
-2. T-003 Ruflo pin + skills install (global skill already present).
-3. T-004 CI pipeline — also make the CI job a required check on `main`.
+1. T-005 Docker Compose core profile (Docker Desktop is running: 16 GB RAM, 20 CPU).
+2. T-006 Database migration runner (after T-005).
+3. T-008 Keycloak realm as code (after T-005); T-016 Persian design system can start anytime (depends on T-002).
 
 ## Open questions for the owner
-- None blocking Sprint 0.
+- None blocking.
 
 ## Known risks
-- Repo is public: any committed secret is exposed at once. Gitleaks arrives in T-004; until then keep `.env*` out (already gitignored).
-- Corteza has no Persian locale (PoC T-020 decides).
-- No BPMN designer off the shelf without watermark (PoC T-021 decides A vs B).
-- Rubika has no documented webhook signature.
+- Repo is public: gitleaks runs in CI on every push/PR.
+- Ruflo via npx resolves its dependency tree unlocked (dev tooling only, never in product).
+- Corteza has no Persian locale (PoC T-020); no watermark-free BPMN designer (PoC T-021); Rubika has no webhook signature.

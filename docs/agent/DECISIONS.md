@@ -21,3 +21,10 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-26 | T-002 | Workspace packages export TS source (`exports: ./src/index.ts`, moduleResolution Bundler, no build step yet); AGENTS.md size limits enforced by ESLint | KISS
 2026-11-26 | T-003 | Ruflo fork synced and tagged `lavin-pin-2026-11-26` = 3f2a40a2f06db9138f97ad8d582329189395e8ab; CLI `ruflo@3.80.8` exact dev dep (MIT); project skills installed from that tag only | SETUP.md §2-4
 2026-11-26 | T-003 | `ruflo init --minimal`, trimmed: no auto-approve, no AGENT_TEAMS env, no generic skills, ADR auto-generate off; no Ruflo plugins (registry unsigned); funnel promos disabled | least privilege, token economy
+2026-11-27 | T-004 | pnpm 9 → 10.34.9 for supply-chain guards: minimumReleaseAge 7 days, trustPolicy no-downgrade, blockExoticSubdeps; build scripts blocked by default | owner; Semgrep OWASP A08 findings
+2026-11-27 | T-004 | Ruflo removed from devDependencies; run only as `npx -y ruflo@3.80.8`; project skills usable in any task, swarms/MCP only for `Mode: swarm` | owner; its tree failed trust/age guards (agentdb@3.10.1, @ruvector/core@0.1.39 lost provenance)
+2026-11-27 | T-004 | License gate: prod = strict allowlist; dev = allowlist + reviewed exceptions (currently none); allowlist += BlueOak-1.0.0, CC0-1.0, Unlicense, CC-BY-4.0 | owner
+2026-11-27 | T-004 | trustPolicyExclude `undici-types@6.21.0` (2024 Node core release, pre-provenance line; needed by @types/node@22) | reviewed false positive
+2026-11-27 | T-004 | `vite` declared explicitly (required peer of vitest 5): pnpm auto-install-peers pins the newest version and bypasses minimumReleaseAge | pnpm behaviour
+2026-11-27 | T-004 | CI tools: actions pinned by SHA, gitleaks/semgrep Docker images by digest, SBOM via `npx @cyclonedx/cdxgen@12.9.3` in CI only; `ci-ok` aggregate job is the required check | owner chose cdxgen
+2026-11-27 | T-004 | @types/node@22 approved as a root dev dependency for all Node packages | owner
