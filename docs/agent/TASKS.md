@@ -16,11 +16,11 @@ Done when: `git log --oneline` shows the scaffold commit on the remote; branch p
 Evidence: repo `kayvanazarbarzin/lovin` (public, owner choice); `git log --oneline origin/main` shows scaffold + T-001 commits; `gh api .../branches/main/protection` → reviews=1, force_push=false, deletions=false, admins bypass. Required CI check deferred to T-004.
 
 ### T-002 · Monorepo skeleton
-Status: todo · Size: M · Mode: single · Depends: T-001
+Status: done · Size: M · Mode: single · Depends: T-001
 Read: ADR-000 §1, §4 · PRD §20.5 (search "Monorepo")
 Do: pnpm workspaces + Turborepo; folders `apps/{web,api,worker}`, `services/{crm-adapter,workflow-facade,channel-gateway,cti-gateway,ai-gateway,eval-service}`, `packages/{authz,contracts,events,i18n,ui,settings,http,observability,test-kit}`; shared `tsconfig.base.json` (strict, noUncheckedIndexedAccess), ESLint flat config + Prettier, Vitest workspace; each package has `index.ts` + one passing smoke test; `dependency-cruiser` rule: no imports of another module's non-index files.
 Done when: `pnpm install && pnpm lint && pnpm typecheck && pnpm test` green; a deliberate cross-module internal import fails `pnpm lint:deps`.
-Evidence:
+Evidence: 2026-11-26 — install OK (pnpm 9.15.9); `pnpm lint` ✔ (eslint + depcruise: 0 violations, 36 modules); `pnpm typecheck` 18/18; `pnpm test` 18/18. Deliberate `modules/beta → modules/alpha/internal.ts` and `packages/http → packages/authz/src/deep.ts` → `lint:deps` exit 2 with `no-api-module-internals` + `no-workspace-package-internals`; import via `alpha/index` allowed.
 
 ### T-003 · Ruflo pin and skills
 Status: todo · Size: S · Mode: single · Depends: T-002

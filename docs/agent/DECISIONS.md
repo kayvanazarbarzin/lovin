@@ -16,3 +16,6 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-26 | PLAN | Agent docs in English to save tokens; all UI text Persian via i18n | token economy
 2026-11-26 | T-001 | GitHub repo is `kayvanazarbarzin/lovin` (not `lavin`), public so free-plan branch protection works; LICENSE stays proprietary | owner
 2026-11-26 | T-001 | `main` protection: PR + 1 approving review, no force-push/delete, admins may bypass (solo owner + agent commit protocol); required CI check added in T-004 | no CI jobs exist yet
+2026-11-26 | T-002 | Toolchain per SETUP.md: Node >=22 (`.nvmrc` 22), pnpm pinned via `packageManager: pnpm@9.15.9` | owner rejected Node 24/pnpm 12
+2026-11-26 | T-002 | Dev deps: turbo, typescript ~6.0 (TS 7 unsupported by typescript-eslint), eslint + @eslint/js + typescript-eslint + eslint-config-prettier, prettier, vitest, dependency-cruiser — all MIT/Apache-2.0 | named in T-002
+2026-11-26 | T-002 | Workspace packages export TS source (`exports: ./src/index.ts`, moduleResolution Bundler, no build step yet); AGENTS.md size limits enforced by ESLint | KISS
