@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "claudeFlow": {
+    "version": "3.0.0",
+    "enabled": true,
+    "swarm": {
+      "topology": "mesh",
+      "maxAgents": 5
+    },
+    "memory": {
+      "backend": "memory",
+      "enableHNSW": false
+    },
+    "neural": {
+      "enabled": false
+    },
+    "daemon": {
+      "autoStart": false
+    },
+    "adr": {
+      "autoGenerate": false,
+      "directory": "/docs/architecture"
+    },
+    "security": {
+      "autoScan": true,
+      "cveCheck": true
+    }
+  }
+}

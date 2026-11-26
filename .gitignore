@@ -32,3 +32,18 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .claude/settings.local.json
+
+# Ruflo local secrets and runtime data
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+
+# Skill links (restored from skills-lock.json)
+.claude/skills/
+# Ruflo local runtime state
+.claude-flow/harness-active-policy.json
+.claude-flow/policy/
+.claude/proven-config.json
+.claude/.proven-config-version

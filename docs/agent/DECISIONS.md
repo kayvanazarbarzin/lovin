@@ -19,3 +19,5 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-26 | T-002 | Toolchain per SETUP.md: Node >=22 (`.nvmrc` 22), pnpm pinned via `packageManager: pnpm@9.15.9` | owner rejected Node 24/pnpm 12
 2026-11-26 | T-002 | Dev deps: turbo, typescript ~6.0 (TS 7 unsupported by typescript-eslint), eslint + @eslint/js + typescript-eslint + eslint-config-prettier, prettier, vitest, dependency-cruiser — all MIT/Apache-2.0 | named in T-002
 2026-11-26 | T-002 | Workspace packages export TS source (`exports: ./src/index.ts`, moduleResolution Bundler, no build step yet); AGENTS.md size limits enforced by ESLint | KISS
+2026-11-26 | T-003 | Ruflo fork synced and tagged `lavin-pin-2026-11-26` = 3f2a40a2f06db9138f97ad8d582329189395e8ab; CLI `ruflo@3.80.8` exact dev dep (MIT); project skills installed from that tag only | SETUP.md §2-4
+2026-11-26 | T-003 | `ruflo init --minimal`, trimmed: no auto-approve, no AGENT_TEAMS env, no generic skills, ADR auto-generate off; no Ruflo plugins (registry unsigned); funnel promos disabled | least privilege, token economy

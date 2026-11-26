@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "skills": {
+    "adr-create": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-adr/skills/adr-create/SKILL.md",
+      "computedHash": "6da902d46febb182a7486ab82bc893e00601f7779fb2c995345677ed9a6d5c5c"
+    },
+    "adr-review": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-adr/skills/adr-review/SKILL.md",
+      "computedHash": "4936d560d98d4715d074b1ccaba9315bf56eac3e7c4f5d13518ab454f3f15312"
+    },
+    "cost-compact-context": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-cost-tracker/skills/cost-compact-context/SKILL.md",
+      "computedHash": "9c37ede2d3a80962da9c0b6cd5ca67b2d36a2a14855903df44ab37f8c0d21564"
+    },
+    "dependency-check": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-security-audit/skills/dependency-check/SKILL.md",
+      "computedHash": "f5fd628e47085076e1298209d16b26a38876cb741c67321067c8c1ca6fe88613"
+    },
+    "migrate-create": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-migrations/skills/migrate-create/SKILL.md",
+      "computedHash": "85f1f6bd70df94b1e7da416e3434d03d83adf3fb867f61355ba96913e21d6b9f"
+    },
+    "migrate-validate": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-migrations/skills/migrate-validate/SKILL.md",
+      "computedHash": "978f06a719ef1439db6c09249e5ad764fc1131d23c2eb11e8471f8f51b30cbd0"
+    },
+    "security-scan": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-security-audit/skills/security-scan/SKILL.md",
+      "computedHash": "6d7d2b5e745cbb31891551bf6881c7020936a0ce2a715625eb4985d2e418b9f3"
+    },
+    "tdd-workflow": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-testgen/skills/tdd-workflow/SKILL.md",
+      "computedHash": "e0797a8558eede954a4d1f1651fa5b86331b126386d05a41c3e161ea8cd134a4"
+    },
+    "test-gaps": {
+      "source": "kayvanazarbarzin/ruflo",
+      "ref": "lavin-pin-2026-11-26",
+      "commit": "3f2a40a2f06db9138f97ad8d582329189395e8ab",
+      "sourceType": "github",
+      "skillPath": "plugins/ruflo-testgen/skills/test-gaps/SKILL.md",
+      "computedHash": "600e49b53295a9f31060bdd6de9d55e281f49a55e7d153bc2e909e3c1b8ee3c6"
+    }
+  }
+}
