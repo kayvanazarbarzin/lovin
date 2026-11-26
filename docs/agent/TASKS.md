@@ -9,11 +9,11 @@ Phases F2–F6 are listed as epics; expanding an epic into tasks is itself a tas
 ## Phase F0/F1 — Sprint 0 and Foundation
 
 ### T-001 · Repository bootstrap
-Status: todo · Size: S · Mode: single · Depends: —
+Status: done · Size: S · Mode: single · Depends: —
 Read: `AGENTS.md`, `docs/agent/SETUP.md` §1
 Do: Create GitHub repo `lavin` (private), push this scaffold as the first commit on `main`, protect `main` (PR + 1 review + CI green), add `.gitignore` (node, next, env, coverage), `.editorconfig`, `LICENSE` (owner to choose; default proprietary notice).
 Done when: `git log --oneline` shows the scaffold commit on the remote; branch protection visible in repo settings.
-Evidence:
+Evidence: repo `kayvanazarbarzin/lovin` (public, owner choice); `git log --oneline origin/main` shows scaffold + T-001 commits; `gh api .../branches/main/protection` → reviews=1, force_push=false, deletions=false, admins bypass. Required CI check deferred to T-004.
 
 ### T-002 · Monorepo skeleton
 Status: todo · Size: M · Mode: single · Depends: T-001
@@ -32,7 +32,7 @@ Evidence:
 ### T-004 · CI pipeline
 Status: todo · Size: M · Mode: single · Depends: T-002
 Read: AGENTS.md §7–8, LICENSE-DECISION §4
-Do: GitHub Actions: lint, typecheck, unit tests, integration tests (Testcontainers), Gitleaks, Semgrep (OWASP rules), `pnpm audit --audit-level=high`, CycloneDX SBOM artifact, license allowlist gate (fail on unknown/AGPL/SSPL/BUSL); PR template with fields from PRD §20.4.
+Do: GitHub Actions: lint, typecheck, unit tests, integration tests (Testcontainers), Gitleaks, Semgrep (OWASP rules), `pnpm audit --audit-level=high`, CycloneDX SBOM artifact, license allowlist gate (fail on unknown/AGPL/SSPL/BUSL); PR template with fields from PRD §20.4; add the CI job as a required status check on `main` protection.
 Done when: CI green on main; a test PR adding a GPL-3 or unknown-license package fails the license job (AT-20); SBOM artifact downloadable.
 Evidence:
 

@@ -14,3 +14,5 @@ Format: `date | task | decision | why`. Big decisions also get an ADR.
 2026-11-26 | PLAN | Arkan repos: owner has permission to reuse code; Arkan company data/prompts/brand still excluded; red flags never copied | owner, LICENSE-DECISION
 2026-11-26 | PLAN | Ruflo: sync fork with upstream, pin 3.80.8; skill installed globally; swarm only for `Mode: swarm` tasks | owner, SETUP.md
 2026-11-26 | PLAN | Agent docs in English to save tokens; all UI text Persian via i18n | token economy
+2026-11-26 | T-001 | GitHub repo is `kayvanazarbarzin/lovin` (not `lavin`), public so free-plan branch protection works; LICENSE stays proprietary | owner
+2026-11-26 | T-001 | `main` protection: PR + 1 approving review, no force-push/delete, admins may bypass (solo owner + agent commit protocol); required CI check added in T-004 | no CI jobs exist yet
